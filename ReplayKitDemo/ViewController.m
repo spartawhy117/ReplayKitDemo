@@ -11,13 +11,13 @@
 
 #define AnimationDuration (0.3)
 
-@interface ViewController ()<RPPreviewViewControllerDelegate>
+@interface ViewController ()<RPPreviewViewControllerDelegate,RPBroadcastActivityViewControllerDelegate>
 @property (weak, nonatomic) IBOutlet UIButton *btnStart;
 @property (weak, nonatomic) IBOutlet UIButton *btnStop;
+@property (weak, nonatomic) IBOutlet UIButton *btnLivePause;
 @property (weak, nonatomic) IBOutlet UILabel *lbTime;
 @property (weak, nonatomic) IBOutlet UIProgressView *progressView;
-
-
+@property(nonatomic, strong)RPBroadcastController * broadcastViewController;
 @property (nonatomic,strong) NSTimer *progressTimer;
 
 @end
@@ -176,7 +176,43 @@
     }
 }
 
+- (IBAction)liveStartPressed:(UIButton *)sender {
+    [RPBroadcastActivityViewController loadBroadcastActivityViewControllerWithHandler:^(RPBroadcastActivityViewController * _Nullable broadcastActivityViewController, NSError * _Nullable error) {
+        if (error != nil) {
+            NSLog(@"%@",error);
+            return;
+        }
+        broadcastActivityViewController.delegate = self;
+        [self presentViewController:broadcastActivityViewController animated:true completion:^{
+        }];
+    }];
+}
 
+- (IBAction)livePause:(UIButton *)sender {
+    NSString *name=self.btnLivePause.titleLabel.text;
+    
+    if([name isEqualToString:@"livepause"])
+    {
+        [self.broadcastViewController pauseBroadcast];
+        self.btnLivePause.titleLabel.text=@"liveresume";
+        NSLog(@"pause");
+    }
+    else
+    {
+        [self.broadcastViewController resumeBroadcast];
+        NSLog(@"resume");
+        self.btnLivePause.titleLabel.text=@"livepause";
+    }
+    
+    
+}
+- (IBAction)liveFinish:(UIButton *)sender {
+    [self.broadcastViewController finishBroadcastWithHandler:^(NSError * _Nullable error) {
+        if (error) {
+            NSLog(@"%@",error);
+        }
+        NSLog(@"finish");
+    }];}
 
 #pragma mark - check method
 -(BOOL)checkSupportRecording
@@ -260,6 +296,29 @@
     
     }];
 }
+
+-(void)broadcastActivityViewController:(RPBroadcastActivityViewController *)broadcastActivityViewController didFinishWithBroadcastController:(RPBroadcastController *)broadcastController error:(NSError *)error{
+    NSLog(@"%s",__func__);
+    if (error) {
+        NSLog(@"%@",error);
+    }
+    [self dismissViewControllerAnimated:true completion:nil];
+    //使用相机
+    [RPScreenRecorder sharedRecorder].cameraEnabled = true;
+    //使用麦克风
+    [RPScreenRecorder sharedRecorder].microphoneEnabled = true;
+    self.broadcastViewController = broadcastController;
+    //开始录制
+    [broadcastController startBroadcastWithHandler:^(NSError * _Nullable error) {
+        NSLog(@"开始录");
+        if (error) {
+            NSLog(@"%@",error);
+        }
+     
+        [self.view addSubview:[RPScreenRecorder sharedRecorder].cameraPreviewView];
+    }];
+}
+
 
 #pragma mark - preview vedio callback
 -(void)previewControllerDidFinish:(RPPreviewViewController *)previewController

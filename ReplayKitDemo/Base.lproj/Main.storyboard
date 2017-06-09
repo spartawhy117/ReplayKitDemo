@@ -58,6 +58,30 @@
                             <progressView opaque="NO" contentMode="scaleToFill" verticalHuggingPriority="750" progress="0.5" translatesAutoresizingMaskIntoConstraints="NO" id="c04-Pb-dda">
                                 <rect key="frame" x="85" y="420" width="205" height="2"/>
                             </progressView>
+                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="cSv-x2-18J">
+                                <rect key="frame" x="61" y="576" width="55" height="30"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <state key="normal" title="livestart"/>
+                                <connections>
+                                    <action selector="liveStartPressed:" destination="BYZ-38-t0r" eventType="touchUpInside" id="Fvh-fl-ZJ2"/>
+                                </connections>
+                            </button>
+                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="F2B-Hr-C1p">
+                                <rect key="frame" x="166" y="576" width="65" height="30"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <state key="normal" title="livepause"/>
+                                <connections>
+                                    <action selector="livePause:" destination="BYZ-38-t0r" eventType="touchUpInside" id="UIk-xy-a7T"/>
+                                </connections>
+                            </button>
+                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="6JD-Ow-MAo">
+                                <rect key="frame" x="276" y="576" width="60" height="30"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <state key="normal" title="livefinsih"/>
+                                <connections>
+                                    <action selector="liveFinish:" destination="BYZ-38-t0r" eventType="touchUpInside" id="JW5-vI-TBB"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <constraints>
@@ -76,6 +100,7 @@
                         </constraints>
                     </view>
                     <connections>
+                        <outlet property="btnLivePause" destination="F2B-Hr-C1p" id="uCw-f6-5wq"/>
                         <outlet property="btnStart" destination="Wih-K2-Ldp" id="5uw-m1-XEX"/>
                         <outlet property="btnStop" destination="1hZ-2d-zNf" id="Avd-C8-uLM"/>
                         <outlet property="lbTime" destination="0ot-vU-u4S" id="LwR-zG-YVq"/>
