@@ -36,6 +36,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		EF0A866E1EED8394000F4778 /* ReplayKitDemo.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = ReplayKitDemo.entitlements; sourceTree = "<group>"; };
 		EFE5FD371EEA6768000AA244 /* ReplayKitDemo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ReplayKitDemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		EFE5FD3B1EEA6768000AA244 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		EFE5FD3D1EEA6768000AA244 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
@@ -105,6 +106,7 @@
 		EFE5FD391EEA6768000AA244 /* ReplayKitDemo */ = {
 			isa = PBXGroup;
 			children = (
+				EF0A866E1EED8394000F4778 /* ReplayKitDemo.entitlements */,
 				EFE5FD3D1EEA6768000AA244 /* AppDelegate.h */,
 				EFE5FD3E1EEA6768000AA244 /* AppDelegate.m */,
 				EFE5FD401EEA6768000AA244 /* ViewController.h */,
@@ -221,6 +223,14 @@
 						CreatedOnToolsVersion = 8.3.3;
 						DevelopmentTeam = 6MFEP9UA6E;
 						ProvisioningStyle = Automatic;
+						SystemCapabilities = {
+							com.apple.BackgroundModes = {
+								enabled = 1;
+							};
+							com.apple.InterAppAudio = {
+								enabled = 0;
+							};
+						};
 					};
 					EFE5FD4F1EEA6768000AA244 = {
 						CreatedOnToolsVersion = 8.3.3;
@@ -532,6 +542,7 @@
 				EFE5FD661EEA6768000AA244 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		EFE5FD671EEA6768000AA244 /* Build configuration list for PBXNativeTarget "ReplayKitDemoTests" */ = {
 			isa = XCConfigurationList;
@@ -540,6 +551,7 @@
 				EFE5FD691EEA6768000AA244 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		EFE5FD6A1EEA6768000AA244 /* Build configuration list for PBXNativeTarget "ReplayKitDemoUITests" */ = {
 			isa = XCConfigurationList;
@@ -548,6 +560,7 @@
 				EFE5FD6C1EEA6768000AA244 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

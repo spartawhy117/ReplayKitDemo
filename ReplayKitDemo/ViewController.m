@@ -166,13 +166,13 @@
     
     NSString *name=sender.titleLabel.text;
     
-    if([name isEqualToString:@"start"])
+        if([name isEqualToString:@"start"])
     {
-        
+        [self startRecording];
     }
     else if([name isEqualToString:@"stop"])
     {
-        
+        [self stopRecording];
     }
 }
 
@@ -248,19 +248,21 @@
         return;
     }
     
-    __weak ViewController *weakSelf=self;
+//    __weak ViewController *weakSelf=self;
     
-    [[RPScreenRecorder sharedRecorder]startRecordingWithHandler:^(NSError *error)
-     {
+    [[RPScreenRecorder sharedRecorder]startRecordingWithHandler:^(NSError *error){
          NSLog(@"start log");
          if(error)
          {
              NSLog(@"wrong meassage %@",error);
-             [weakSelf showAlertWithString:error.description];
+             [self showAlertWithString:error.description];
          }
          else
          {
-             weakSelf.progressTimer=[NSTimer scheduledTimerWithTimeInterval:0.05f target:self selector:@selector(changeProgressValue) userInfo:nil repeats:YES];
+             
+             self.progressTimer=[NSTimer scheduledTimerWithTimeInterval:0.05f target:self selector:@selector(changeProgressValue) userInfo:nil repeats:YES];
+             
+             NSLog(@"start recording");
              
              
          }
@@ -273,22 +275,22 @@
 }
 -(void)stopRecording
 {
-    __weak ViewController *weakSelf=self;
+//    __weak ViewController *weakSelf=self;
     [[RPScreenRecorder sharedRecorder]stopRecordingWithHandler:^(RPPreviewViewController * _Nullable previewViewController, NSError * _Nullable error) {
         
         if(error)
         {
             NSLog(@"wrong meassage %@",error);
-            [weakSelf showAlertWithString:error.description];
+            [self showAlertWithString:error.description];
             
         }
         else{
             
             NSLog(@"show preview");
-            previewViewController.previewControllerDelegate=weakSelf;
+            previewViewController.previewControllerDelegate=self;
             
-            [weakSelf.progressTimer invalidate];
-            weakSelf.progressTimer=nil;
+            [self.progressTimer invalidate];
+            self.progressTimer=nil;
             
             [self showVideoPreviewController:previewViewController withAnimation:YES];
         }
