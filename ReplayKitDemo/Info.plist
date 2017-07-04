@@ -43,5 +43,9 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+    <key>NSCameraUsageDescription</key>
+    <string>ReplayKit直播请求使用您的摄像头</string>
+    <key>NSMicrophoneUsageDescription</key>
+    <string>ReplayKit直播请求使用您的麦克风</string>
 </dict>
 </plist>

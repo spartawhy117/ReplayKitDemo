@@ -10,14 +10,21 @@
 #import <ReplayKit/ReplayKit.h>
 
 #define AnimationDuration (0.3)
+#define SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(v)  ([[[UIDevice currentDevice] systemVersion] compare:v options:NSNumericSearch] != NSOrderedAscending)
 
-@interface ViewController ()<RPPreviewViewControllerDelegate,RPBroadcastActivityViewControllerDelegate>
+@interface ViewController ()<RPScreenRecorderDelegate,RPPreviewViewControllerDelegate,RPBroadcastActivityViewControllerDelegate,RPBroadcastControllerDelegate>
 @property (weak, nonatomic) IBOutlet UIButton *btnStart;
 @property (weak, nonatomic) IBOutlet UIButton *btnStop;
 @property (weak, nonatomic) IBOutlet UIButton *btnLivePause;
 @property (weak, nonatomic) IBOutlet UILabel *lbTime;
 @property (weak, nonatomic) IBOutlet UIProgressView *progressView;
-@property(nonatomic, strong)RPBroadcastController * broadcastViewController;
+
+
+
+@property(nonatomic, weak)RPBroadcastController * broadcastController;
+@property (nonatomic, weak)   UIView   *cameraPreview;
+@property (nonatomic, assign) BOOL allowLive;
+
 @property (nonatomic,strong) NSTimer *progressTimer;
 
 @end
@@ -26,7 +33,15 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    // Do any additional setup after loading the view, typically from a nib.
+    
+     self.allowLive = SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"10.0");
+    
+    if(self.allowLive)
+    {
+        [self setUpCameraAndMic];
+        
+    }
+    
 }
 
 
@@ -177,42 +192,78 @@
 }
 
 - (IBAction)liveStartPressed:(UIButton *)sender {
-    [RPBroadcastActivityViewController loadBroadcastActivityViewControllerWithHandler:^(RPBroadcastActivityViewController * _Nullable broadcastActivityViewController, NSError * _Nullable error) {
-        if (error != nil) {
-            NSLog(@"%@",error);
-            return;
-        }
-        broadcastActivityViewController.delegate = self;
-        [self presentViewController:broadcastActivityViewController animated:true completion:^{
+    
+    __weak ViewController* weakSelf=self;
+    
+    if(![RPScreenRecorder sharedRecorder].isRecording)
+    {
+        [RPBroadcastActivityViewController loadBroadcastActivityViewControllerWithHandler:^(RPBroadcastActivityViewController * _Nullable broadcastActivityViewController, NSError * _Nullable error) {
+            if (error != nil) {
+                NSLog(@"%@",error);
+                return;
+            }
+            broadcastActivityViewController.delegate=weakSelf;
+            broadcastActivityViewController.modalPresentationStyle=UIModalPresentationPopover;
+            
+            //ipad适配
+            if([UIDevice currentDevice].userInterfaceIdiom==UIUserInterfaceIdiomPad)
+            {
+                broadcastActivityViewController.popoverPresentationController.sourceRect = weakSelf.btnStop.frame;
+                broadcastActivityViewController.popoverPresentationController.sourceView=weakSelf.btnStop;
+                
+            }
+            
+                [weakSelf presentViewController:broadcastActivityViewController animated:true completion:^{
+                    
+                }];
+            
         }];
-    }];
-}
+
+    }
+    else{
+        //断开当前链接
+        [self.broadcastController finishBroadcastWithHandler:^(NSError * _Nullable error) {
+        
+            //TODO 移除摄像机 改变录制按钮形态
+        }];
+    }
+    
+    
+   }
 
 - (IBAction)livePause:(UIButton *)sender {
     NSString *name=self.btnLivePause.titleLabel.text;
     
-    if([name isEqualToString:@"livepause"])
+    if([name isEqualToString:@"live pause"])
     {
-        [self.broadcastViewController pauseBroadcast];
-        self.btnLivePause.titleLabel.text=@"liveresume";
+        [self.broadcastController pauseBroadcast];
+        [self.btnLivePause setTitle:@"live resume" forState:UIControlStateNormal];
         NSLog(@"pause");
     }
     else
     {
-        [self.broadcastViewController resumeBroadcast];
+        [self.broadcastController resumeBroadcast];
+        [self.btnLivePause setTitle:@"live pause" forState:UIControlStateNormal];
         NSLog(@"resume");
-        self.btnLivePause.titleLabel.text=@"livepause";
+       
     }
     
     
 }
 - (IBAction)liveFinish:(UIButton *)sender {
-    [self.broadcastViewController finishBroadcastWithHandler:^(NSError * _Nullable error) {
+    
+    __weak ViewController *weakSelf=self;
+    [self.broadcastController finishBroadcastWithHandler:^(NSError * _Nullable error) {
         if (error) {
-            NSLog(@"%@",error);
+            NSLog(@"finishBroadcastWithHandler %@",error);
         }
-        NSLog(@"finish");
-    }];}
+        
+        //移除摄像头
+        
+        [weakSelf.cameraPreview removeFromSuperview];
+       
+    }];
+}
 
 #pragma mark - check method
 -(BOOL)checkSupportRecording
@@ -236,6 +287,13 @@
     {
         return YES;
     }
+}
+-(void)setUpCameraAndMic
+{
+    //使用相机
+    [RPScreenRecorder sharedRecorder].cameraEnabled = true;
+    //使用麦克风
+    [RPScreenRecorder sharedRecorder].microphoneEnabled = true;
 }
 
 #pragma mark -replaykit delegate
@@ -300,25 +358,62 @@
 }
 
 -(void)broadcastActivityViewController:(RPBroadcastActivityViewController *)broadcastActivityViewController didFinishWithBroadcastController:(RPBroadcastController *)broadcastController error:(NSError *)error{
-    NSLog(@"%s",__func__);
+   
+    
     if (error) {
-        NSLog(@"%@",error);
+        NSLog(@"didFinishWithBroadcastController with error %@",error);
     }
-    [self dismissViewControllerAnimated:true completion:nil];
-    //使用相机
-    [RPScreenRecorder sharedRecorder].cameraEnabled = true;
-    //使用麦克风
-    [RPScreenRecorder sharedRecorder].microphoneEnabled = true;
-    self.broadcastViewController = broadcastController;
-    //开始录制
-    [broadcastController startBroadcastWithHandler:^(NSError * _Nullable error) {
-        NSLog(@"开始录");
-        if (error) {
-            NSLog(@"%@",error);
-        }
-     
-        [self.view addSubview:[RPScreenRecorder sharedRecorder].cameraPreviewView];
-    }];
+    [broadcastActivityViewController dismissViewControllerAnimated:true completion:nil];
+    
+    self.broadcastController = broadcastController;
+    
+    
+    __weak ViewController* weakSelf=self;
+    if(!error)
+    {
+        [broadcastController startBroadcastWithHandler:^(NSError * _Nullable error) {
+            
+            NSLog(@"broadcastControllerHandler");
+            if(!error)
+            {
+                
+                weakSelf.broadcastController.delegate=self;
+                UIView* cameraView = [[RPScreenRecorder sharedRecorder] cameraPreviewView];
+                weakSelf.cameraPreview=cameraView;
+                if(cameraView)
+                {
+                    cameraView.frame=CGRectMake(0, 0, 200, 200);
+                    [weakSelf.view addSubview:cameraView];
+                    
+                    
+                    
+                }
+                
+                
+            }
+            else{
+                UIAlertController *alertController = [UIAlertController alertControllerWithTitle:@"Error"
+                                                                                         message:error.localizedDescription
+                                                                                  preferredStyle:UIAlertControllerStyleAlert];
+                
+                [alertController addAction:[UIAlertAction actionWithTitle:@"Ok"
+                                                                    style:UIAlertActionStyleCancel
+                                                                  handler:nil]];
+                
+                [self presentViewController:alertController
+                                   animated:YES
+                                 completion:nil];
+            }
+        }];
+        
+        
+    }
+    else{
+        NSLog(@"Error returning from Broadcast Activity: %@", error);
+    }
+    
+    
+    
 }
 
 
